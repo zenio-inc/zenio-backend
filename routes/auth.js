@@ -1,73 +1,39 @@
-import express from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import express from "express";
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 const router = express.Router();
 
-/**
- * REGISTER
- */
-router.post('/register', async (req, res) => {
+router.post("/login", async (req, res) => {
   try {
-    const { username, firstName, lastName, email, password } = req.body;
+    const { email, password } = req.body;
 
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ message: 'Email already exists' });
+    const user = await User.findOne({ email });
 
-    const hashed = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      username,
-      firstName,
-      lastName,
-      email,
-      password: hashed
-    });
-
-    res.json({
-      message: 'User created',
-      userId: user._id
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/**
- * LOGIN
- */
-router.post('/login', async (req, res) => {
-  try {
-    const { login, password } = req.body;
-
-    const user = await User.findOne({
-      $or: [{ email: login }, { username: login }]
-    });
-
-    if (!user) return res.status(400).json({ message: 'User not found' });
-
-    const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(400).json({ message: 'Wrong password' });
+    if (!user || user.password !== password) {
+      return res.json({
+        ok: false,
+        error: "INVALID_CREDENTIALS"
+      });
+    }
 
     const token = jwt.sign(
-      { id: user._id },
+      { userId: user._id, username: user.username },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" }
     );
 
     res.json({
+      ok: true,
       token,
       user: {
         id: user._id,
-        username: user.username,
-        email: user.email
+        username: user.username
       }
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json({ ok: false, error: "LOGIN_FAILED" });
   }
 });
 

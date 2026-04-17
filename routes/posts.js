@@ -2,6 +2,7 @@ import express from "express";
 import Post from "../models/Post.js";
 import Comment from "../models/Comment.js";
 import Vote from "../models/Vote.js";
+import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 

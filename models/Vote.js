@@ -1,23 +1,23 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const voteSchema = new mongoose.Schema({
   postId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post',
-    required: true
+    ref: "Post",
+    required: true,
   },
 
-  userId: {
+  UID: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
 
   value: {
     type: Number,
     enum: [1, -1], // 1 = upvote, -1 = downvote
-    required: true
-  }
+    required: true,
+  },
 });
 
-export default mongoose.model('Vote', voteSchema);
+export default mongoose.model("Vote", voteSchema);
